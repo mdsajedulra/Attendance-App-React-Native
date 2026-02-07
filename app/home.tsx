@@ -1,7 +1,11 @@
 import api from "@/utils/api";
 import { formatBanglaDate } from "@/utils/formatBanglaDate";
 import { getStpotDetails } from "@/utils/spot";
-import { FontAwesome5, Ionicons, MaterialIcons } from "@expo/vector-icons";
+import {
+  Ionicons,
+  MaterialCommunityIcons,
+  MaterialIcons,
+} from "@expo/vector-icons";
 import { useFocusEffect, useRouter } from "expo-router";
 import { useCallback, useState } from "react";
 import {
@@ -19,7 +23,7 @@ import {
 import { RefreshControl } from "react-native-gesture-handler";
 import ContactButtons from "./call/call";
 
-// Type Definitions (আগের মতোই)
+// Type Definitions
 type TAttendance = {
   _id: string;
   spotId: string;
@@ -40,28 +44,23 @@ interface IAttendance {
 export default function Home() {
   const router = useRouter();
 
-  // State Management
   const [refreshing, setRefreshing] = useState(false);
   const [loadingData, setLoadingData] = useState(true);
   const [lastItem, setLastItem] = useState<IAttendance | null>(null);
 
-  // Separate Loading States for each button (প্রতিটি বাটনের জন্য আলাদা লোডিং স্টেট)
   const [loadingMale, setLoadingMale] = useState(false);
   const [loadingFemale, setLoadingFemale] = useState(false);
   const [loadingChild, setLoadingChild] = useState(false);
   const [loadingComment, setLoadingComment] = useState(false);
 
-  // Input States
   const [femaleValue, setFemaleValue] = useState("");
   const [maleValue, setMaleValue] = useState("");
   const [childValue, setChildValue] = useState("");
   const [commentValue, setCommentValue] = useState("");
 
-  // Combined loading state for disabling other actions
   const isGlobalLoading =
     loadingMale || loadingFemale || loadingChild || loadingComment;
 
-  // বাটনের ডিসেবল লজিক (Global Loading এবং Local Input Validity চেক করা হয়েছে)
   const isMaleButtonDisabled =
     isGlobalLoading || maleValue.trim() === "" || parseInt(maleValue) === 0;
   const isFemaleButtonDisabled =
@@ -75,7 +74,7 @@ export default function Home() {
       const spot = await getStpotDetails();
       if (spot?.data?._id) {
         const res = await api.get(
-          `/attendance/get-all-last-attendance?spotId=${spot.data._id}`
+          `/attendance/get-all-last-attendance?spotId=${spot.data._id}`,
         );
         if (res?.data?.data && res.data.data.length > 0) {
           setLastItem(res.data.data[0]);
@@ -98,7 +97,7 @@ export default function Home() {
       setFemaleValue("");
       setChildValue("");
       setCommentValue("");
-    }, [])
+    }, []),
   );
 
   const onRefresh = () => {
@@ -106,68 +105,56 @@ export default function Home() {
     loadLast().finally(() => setRefreshing(false));
   };
 
-  // সাবমিট লজিক (Male/Female/Child এর জন্য)
-  // নতুন: setLoading প্যারামিটার যোগ করা হয়েছে
   const handleSubmit = async (
     name: string,
     value: string,
     endpoint: string,
-    setLoading: React.Dispatch<React.SetStateAction<boolean>>
+    setLoading: React.Dispatch<React.SetStateAction<boolean>>,
   ) => {
     if (value.trim() === "" || parseInt(value) === 0) {
       Alert.alert("সতর্কতা", "দয়া করে ০-এর বেশি সংখ্যা লিখুন");
       return;
     }
-
-    setLoading(true); // নির্দিষ্ট বাটন লোডিং শুরু
+    setLoading(true);
     const spot = await getStpotDetails();
     try {
       await api.post(endpoint, {
         [name]: parseInt(value || "0"),
         spotId: spot?.data?._id,
       });
-
       Alert.alert("সফল", "তথ্য সফলভাবে আপডেট করা হয়েছে");
-
       if (name === "male") setMaleValue("");
       if (name === "female") setFemaleValue("");
       if (name === "child") setChildValue("");
-
       loadLast();
     } catch (error: any) {
       Alert.alert(
         "ত্রুটি",
-        error?.response?.data?.message || "Something went wrong"
+        error?.response?.data?.message || "Something went wrong",
       );
     } finally {
-      setLoading(false); // নির্দিষ্ট বাটন লোডিং শেষ
+      setLoading(false);
     }
   };
 
-  // কমেন্ট সাবমিট লজিক (নতুন)
   const handleCommentSubmit = async () => {
     if (isCommentButtonDisabled) return;
-
-    setLoadingComment(true); // কমেন্ট বাটন লোডিং শুরু
+    setLoadingComment(true);
     const spot = await getStpotDetails();
-
     try {
-      const payload = {
+      await api.post("/attendance/create-comment", {
         spotId: spot?.data?._id,
         comment: commentValue.trim(),
-      };
-
-      await api.post("/attendance/create-comment", payload);
-
+      });
       Alert.alert("সফল", "আপনার মন্তব্য সফলভাবে পাঠানো হয়েছে");
-      setCommentValue(""); // কমেন্ট সাবমিট করার পর ক্লিয়ার হবে
+      setCommentValue("");
     } catch (error: any) {
       Alert.alert(
         "ত্রুটি",
-        error?.response?.data?.message || "কমেন্ট পাঠাতে সমস্যা হয়েছে"
+        error?.response?.data?.message || "কমেন্ট পাঠাতে সমস্যা হয়েছে",
       );
     } finally {
-      setLoadingComment(false); // কমেন্ট বাটন লোডিং শেষ
+      setLoadingComment(false);
     }
   };
 
@@ -199,7 +186,7 @@ export default function Home() {
           showsVerticalScrollIndicator={false}
           keyboardShouldPersistTaps="handled"
         >
-          {/* Header Section (আগের মতোই) */}
+          {/* Header */}
           <View className="bg-blue-600 pt-10 pb-16 px-6 rounded-b-[30px] shadow-lg">
             <View className="flex-row justify-between items-center mb-4">
               <Text className="text-white text-lg font-medium opacity-80">
@@ -213,33 +200,34 @@ export default function Home() {
             </Text>
           </View>
 
-          {/* Body Container */}
           <View className="px-5 -mt-10 pb-20">
-            {/* MALE CARD */}
+            {/* BONRUTI CARD */}
             <View className="bg-white p-5 rounded-2xl shadow-sm mb-4 border border-gray-100">
               <View className="flex-row justify-between items-start mb-4">
                 <View className="flex-row items-center gap-3">
                   <View className="bg-blue-50 p-2 rounded-lg">
-                    <FontAwesome5 name="male" size={24} color="#2563EB" />
+                    {/* আইকন কালার শুধু পরিবর্তন করা হয়েছে (Brown) */}
+                    <MaterialCommunityIcons
+                      name="bread-slice"
+                      size={24}
+                      color="#92400E"
+                    />
                   </View>
-                  <Text className="text-xl font-bold text-gray-800">পুরুষ</Text>
+                  <Text className="text-xl font-bold text-gray-800">
+                    বণরুটি
+                  </Text>
                 </View>
 
                 <View
-                  className={`px-3 py-1 rounded-full ${
-                    lastItem?.lastMale ? "bg-blue-50" : "bg-red-50"
-                  }`}
+                  className={`px-3 py-1 rounded-full ${lastItem?.lastMale ? "bg-blue-50" : "bg-red-50"}`}
                 >
-                  {lastItem?.lastMale ? (
-                    <Text className="text-blue-600 text-xs font-medium">
-                      {formatBanglaDate(lastItem.lastMale.createdAt)} -{" "}
-                      {lastItem.lastMale.male} জন
-                    </Text>
-                  ) : (
-                    <Text className="text-red-500 text-xs font-medium">
-                      এন্ট্রি নেই
-                    </Text>
-                  )}
+                  <Text
+                    className={`${lastItem?.lastMale ? "text-blue-600" : "text-red-500"} text-xs font-medium`}
+                  >
+                    {lastItem?.lastMale
+                      ? `${formatBanglaDate(lastItem.lastMale.createdAt)} - ${lastItem.lastMale.male} টি`
+                      : "এন্ট্রি নেই"}
+                  </Text>
                 </View>
               </View>
 
@@ -254,19 +242,17 @@ export default function Home() {
                 />
                 <TouchableOpacity
                   disabled={isMaleButtonDisabled}
-                  // UPDATED: Always use the active style (bg-blue-600)
                   className="justify-center items-center rounded-xl px-6 shadow-sm bg-blue-600 active:bg-blue-700"
                   onPress={() =>
                     handleSubmit(
                       "male",
                       maleValue,
                       "/attendance/create-male",
-                      setLoadingMale
+                      setLoadingMale,
                     )
                   }
                 >
                   <Text className="text-white font-bold text-base">
-                    {/* নির্দিষ্ট লোডিং স্টেট চেক করা হয়েছে */}
                     {loadingMale ? (
                       <ActivityIndicator color="white" />
                     ) : (
@@ -277,31 +263,31 @@ export default function Home() {
               </View>
             </View>
 
-            {/* FEMALE CARD */}
+            {/* DIM CARD */}
             <View className="bg-white p-5 rounded-2xl shadow-sm mb-4 border border-gray-100">
               <View className="flex-row justify-between items-start mb-4">
                 <View className="flex-row items-center gap-3">
                   <View className="bg-purple-50 p-2 rounded-lg">
-                    <FontAwesome5 name="female" size={24} color="#9333EA" />
+                    {/* আইকন কালার শুধু পরিবর্তন করা হয়েছে (Orange/Yellow) */}
+                    <MaterialCommunityIcons
+                      name="egg"
+                      size={24}
+                      color="#F59E0B"
+                    />
                   </View>
-                  <Text className="text-xl font-bold text-gray-800">নারী</Text>
+                  <Text className="text-xl font-bold text-gray-800">ডিম</Text>
                 </View>
 
                 <View
-                  className={`px-3 py-1 rounded-full ${
-                    lastItem?.lastFemale ? "bg-purple-50" : "bg-red-50"
-                  }`}
+                  className={`px-3 py-1 rounded-full ${lastItem?.lastFemale ? "bg-purple-50" : "bg-red-50"}`}
                 >
-                  {lastItem?.lastFemale ? (
-                    <Text className="text-purple-600 text-xs font-medium">
-                      {formatBanglaDate(lastItem.lastFemale.createdAt)} -{" "}
-                      {lastItem.lastFemale.female} জন
-                    </Text>
-                  ) : (
-                    <Text className="text-red-500 text-xs font-medium">
-                      এন্ট্রি নেই
-                    </Text>
-                  )}
+                  <Text
+                    className={`${lastItem?.lastFemale ? "text-purple-600" : "text-red-500"} text-xs font-medium`}
+                  >
+                    {lastItem?.lastFemale
+                      ? `${formatBanglaDate(lastItem.lastFemale.createdAt)} - ${lastItem.lastFemale.female} টি`
+                      : "এন্ট্রি নেই"}
+                  </Text>
                 </View>
               </View>
 
@@ -316,19 +302,17 @@ export default function Home() {
                 />
                 <TouchableOpacity
                   disabled={isFemaleButtonDisabled}
-                  // UPDATED: Always use the active style (bg-purple-600)
                   className="justify-center items-center rounded-xl px-6 shadow-sm bg-purple-600 active:bg-purple-700"
                   onPress={() =>
                     handleSubmit(
                       "female",
                       femaleValue,
                       "/attendance/create-female",
-                      setLoadingFemale
+                      setLoadingFemale,
                     )
                   }
                 >
                   <Text className="text-white font-bold text-base">
-                    {/* নির্দিষ্ট লোডিং স্টেট চেক করা হয়েছে */}
                     {loadingFemale ? (
                       <ActivityIndicator color="white" />
                     ) : (
@@ -339,31 +323,27 @@ export default function Home() {
               </View>
             </View>
 
-            {/* CHILD CARD */}
+            {/* KOLA CARD */}
             <View className="bg-white p-5 rounded-2xl shadow-sm mb-4 border border-gray-100">
               <View className="flex-row justify-between items-start mb-4">
                 <View className="flex-row items-center gap-3">
                   <View className="bg-green-50 p-2 rounded-lg">
-                    <FontAwesome5 name="child" size={22} color="#16A34A" />
+                    {/* আইকন কালার শুধু পরিবর্তন করা হয়েছে (Yellow) */}
+                    <Text style={{ fontSize: 24 }}>🍌</Text>
                   </View>
-                  <Text className="text-xl font-bold text-gray-800">শিশু</Text>
+                  <Text className="text-xl font-bold text-gray-800">কলা</Text>
                 </View>
 
                 <View
-                  className={`px-3 py-1 rounded-full ${
-                    lastItem?.lastChild ? "bg-green-50" : "bg-red-50"
-                  }`}
+                  className={`px-3 py-1 rounded-full ${lastItem?.lastChild ? "bg-green-50" : "bg-red-50"}`}
                 >
-                  {lastItem?.lastChild ? (
-                    <Text className="text-green-600 text-xs font-medium">
-                      {formatBanglaDate(lastItem.lastChild.createdAt)} -{" "}
-                      {lastItem.lastChild.child} জন
-                    </Text>
-                  ) : (
-                    <Text className="text-red-500 text-xs font-medium">
-                      এন্ট্রি নেই
-                    </Text>
-                  )}
+                  <Text
+                    className={`${lastItem?.lastChild ? "text-green-600" : "text-red-500"} text-xs font-medium`}
+                  >
+                    {lastItem?.lastChild
+                      ? `${formatBanglaDate(lastItem.lastChild.createdAt)} - ${lastItem.lastChild.child} টি`
+                      : "এন্ট্রি নেই"}
+                  </Text>
                 </View>
               </View>
 
@@ -378,19 +358,17 @@ export default function Home() {
                 />
                 <TouchableOpacity
                   disabled={isChildButtonDisabled}
-                  // UPDATED: Always use the active style (bg-green-600)
                   className="justify-center items-center rounded-xl px-6 shadow-sm bg-green-600 active:bg-green-700"
                   onPress={() =>
                     handleSubmit(
                       "child",
                       childValue,
                       "/attendance/create-child",
-                      setLoadingChild
+                      setLoadingChild,
                     )
                   }
                 >
                   <Text className="text-white font-bold text-base">
-                    {/* নির্দিষ্ট লোডিং স্টেট চেক করা হয়েছে */}
                     {loadingChild ? (
                       <ActivityIndicator color="white" />
                     ) : (
@@ -406,7 +384,6 @@ export default function Home() {
               <Text className="text-gray-700 font-semibold mb-3 ml-1">
                 আপনি কি কিছু জানাতে চান?
               </Text>
-
               <View className="flex-row gap-3">
                 <TextInput
                   placeholder="আপনার বার্তা লিখুন..."
@@ -414,15 +391,13 @@ export default function Home() {
                   onChangeText={setCommentValue}
                   className="flex-1 bg-gray-50 border border-gray-200 text-gray-800 text-base rounded-xl px-4 py-3"
                   placeholderTextColor="#9CA3AF"
-                  multiline={true} // মাল্টিলাইন কমেন্টের জন্য
+                  multiline={true}
                 />
                 <TouchableOpacity
                   disabled={isCommentButtonDisabled}
-                  // UPDATED: Always use the active style (bg-slate-800)
                   className="justify-center items-center rounded-xl px-6 shadow-sm bg-slate-800 active:bg-slate-900"
-                  onPress={handleCommentSubmit} // 🚨 API হিট করার ফাংশন
+                  onPress={handleCommentSubmit}
                 >
-                  {/* নির্দিষ্ট লোডিং স্টেট চেক করা হয়েছে */}
                   {loadingComment ? (
                     <ActivityIndicator color="white" />
                   ) : (
@@ -432,7 +407,6 @@ export default function Home() {
               </View>
             </View>
 
-            {/* Footer Contact Buttons */}
             <View className="flex items-center justify-center pb-10">
               <ContactButtons />
             </View>

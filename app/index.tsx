@@ -12,7 +12,7 @@ import {
   Text,
   TextInput,
   TouchableOpacity,
-  View
+  View,
 } from "react-native";
 import api from "../utils/api";
 import "./globals.css";
@@ -44,7 +44,7 @@ export default function Login() {
 
   const handleLogin = async () => {
     if (!spotCode || !password) {
-      Alert.alert("ত্রুটি", "দয়া করে স্পট কোড এবং পাসওয়ার্ড দিন");
+      Alert.alert("ত্রুটি", "দয়া করে স্কুল কোড এবং পাসওয়ার্ড দিন");
       return;
     }
 
@@ -59,17 +59,18 @@ export default function Login() {
         // ২. লগিন সফল হলে টোকেন সেভ করবে
         if (token) await AsyncStorage.setItem("token", token);
         await AsyncStorage.setItem("user", JSON.stringify(data));
-        
+
         // ৩. হোম পেজে নিয়ে যাবে (replace ব্যবহার করায় ব্যাকে আসা যাবে না)
         router.replace("/home");
       } else {
-        Alert.alert("লগিন ব্যর্থ", "ভুল স্পট কোড অথবা পাসওয়ার্ড");
+        Alert.alert("লগিন ব্যর্থ", "ভুল স্কুল কোড অথবা পাসওয়ার্ড");
       }
     } catch (err: any) {
       console.log("Login error:", err?.response?.data || err.message);
       Alert.alert(
         "লগিন ত্রুটি",
-        err?.response?.data?.message || "সার্ভারে সমস্যা হচ্ছে, পরে আবার চেষ্টা করুন।"
+        err?.response?.data?.message ||
+          "সার্ভারে সমস্যা হচ্ছে, পরে আবার চেষ্টা করুন।",
       );
     } finally {
       setLoading(false);
@@ -88,14 +89,16 @@ export default function Login() {
   return (
     <View className="flex-1 bg-blue-600">
       <StatusBar backgroundColor="#2563EB" barStyle="light-content" />
-      
+
       {/* উপরের অংশ - লোগো বা টাইটেল */}
       <View className="flex-[0.4] justify-center items-center">
         <View className="bg-white/20 p-6 rounded-full mb-4">
-            <FontAwesome5 name="user-shield" size={50} color="white" />
+          <FontAwesome5 name="user-shield" size={50} color="white" />
         </View>
         <Text className="text-white text-3xl font-bold">স্বাগতম</Text>
-        <Text className="text-blue-100 text-sm mt-1">আপনার অ্যাকাউন্টে লগিন করুন</Text>
+        <Text className="text-blue-100 text-sm mt-1">
+          আপনার অ্যাকাউন্টে লগিন করুন
+        </Text>
       </View>
 
       {/* নিচের অংশ - সাদা কার্ড */}
@@ -105,14 +108,15 @@ export default function Login() {
           style={{ flex: 1 }}
         >
           <View className="space-y-6">
-            
             {/* Spot Code Input */}
             <View>
-              <Text className="text-gray-700 font-semibold mb-2 ml-1">স্পট কোড</Text>
+              <Text className="text-gray-700 font-semibold mb-2 ml-1">
+                স্কুল কোড
+              </Text>
               <View className="flex-row items-center bg-white border border-gray-200 rounded-xl px-4 py-3 shadow-sm">
                 <FontAwesome5 name="hashtag" size={18} color="#6B7280" />
                 <TextInput
-                  placeholder="আপনার স্পট কোড দিন"
+                  placeholder="আপনার স্কুল কোড দিন"
                   value={spotCode}
                   onChangeText={setSpotCode}
                   className="flex-1 ml-3 text-gray-800 text-base"
@@ -124,9 +128,15 @@ export default function Login() {
 
             {/* Password Input */}
             <View>
-              <Text className="text-gray-700 font-semibold mb-2 ml-1">পাসওয়ার্ড</Text>
+              <Text className="text-gray-700 font-semibold mb-2 ml-1">
+                পাসওয়ার্ড
+              </Text>
               <View className="flex-row items-center bg-white border border-gray-200 rounded-xl px-4 py-3 shadow-sm">
-                <Ionicons name="lock-closed-outline" size={20} color="#6B7280" />
+                <Ionicons
+                  name="lock-closed-outline"
+                  size={20}
+                  color="#6B7280"
+                />
                 <TextInput
                   placeholder="আপনার গোপন পাসওয়ার্ড"
                   secureTextEntry
@@ -149,10 +159,11 @@ export default function Login() {
               {loading ? (
                 <ActivityIndicator color="white" className="mr-2" />
               ) : (
-                <Text className="text-white text-center font-bold text-lg">লগিন করুন</Text>
+                <Text className="text-white text-center font-bold text-lg">
+                  লগিন করুন
+                </Text>
               )}
             </TouchableOpacity>
-
           </View>
         </KeyboardAvoidingView>
       </View>

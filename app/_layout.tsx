@@ -59,7 +59,7 @@ function CustomDrawerContent(props: any) {
             {spot?.data?.spotName || "স্পট ম্যানেজার"}
           </Text>
           <Text className="text-sm font-bold text-gray-800">
-            স্পট কোড: {spot?.data?.spotCode || "spot Code"}
+            স্কুল কোড: {spot?.data?.spotCode || "spot Code"}
           </Text>
           <Text className="text-sm text-gray-500">ম্যানেজমেন্ট ড্যাশবোর্ড</Text>
         </View>
