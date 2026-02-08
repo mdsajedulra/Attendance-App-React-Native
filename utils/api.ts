@@ -2,7 +2,7 @@
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import axios from "axios";
 
-const API_BASE = "https://mobileappsbackend.vercel.app/api/v1";
+const API_BASE = "https://sfpapi.osacabd.org/api/v1";
 
 const api = axios.create({
   baseURL: API_BASE,

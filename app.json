@@ -45,12 +45,12 @@
       "typedRoutes": true,
       "reactCompiler": true
     },
+    "owner": "mdsajedulra",
     "extra": {
       "router": {},
       "eas": {
-        "projectId": "8965ee5d-ef73-43df-9892-3b6d81b386e6"
+        "projectId": "8f127a7f-646c-4f68-9b9e-00f03db4faab"
       }
-    },
-    "owner": "mdsajedulra"
+    }
   }
 }
