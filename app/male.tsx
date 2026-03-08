@@ -1,4 +1,4 @@
-import { getStpotDetails } from "@/utils/spot";
+import { getSchoolDetails } from "@/utils/school";
 import { useEffect, useState } from "react";
 import { Alert, Text, TextInput, TouchableOpacity, View } from "react-native";
 import api from "../utils/api";
@@ -13,11 +13,11 @@ export default function Male() {
   };
 
   const handleSubmit = async () => {
-    const spot = await getStpotDetails();
+    const school = await getSchoolDetails();
     try {
       const res = await api.post("/attendance/create-male", {
         male: parseInt(value || "0"),
-        spotId: spot?.data?._id,
+        schoolId: school?.data?._id,
       });
       Alert.alert("Success", res.data.message);
       setValue("");

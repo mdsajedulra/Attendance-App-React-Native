@@ -19,7 +19,7 @@ import "./globals.css";
 
 export default function Login() {
   const router = useRouter();
-  const [spotCode, setSpotCode] = useState("");
+  const [schoolCode, setschoolCode] = useState("");
   const [password, setPassword] = useState("");
   const [loading, setLoading] = useState(false);
   const [checkingAuth, setCheckingAuth] = useState(true);
@@ -43,14 +43,17 @@ export default function Login() {
   }, []);
 
   const handleLogin = async () => {
-    if (!spotCode || !password) {
+    if (!schoolCode || !password) {
       Alert.alert("ত্রুটি", "দয়া করে স্কুল কোড এবং পাসওয়ার্ড দিন");
       return;
     }
 
     setLoading(true);
     try {
-      const res = await api.post("/spot/spot-login", { spotCode, password });
+      const res = await api.post("/school/school-login", {
+        schoolCode,
+        password,
+      });
       const data = res.data;
 
       const token = data.token || data.accessToken || data?.data?.token;
@@ -108,7 +111,7 @@ export default function Login() {
           style={{ flex: 1 }}
         >
           <View className="space-y-6">
-            {/* Spot Code Input */}
+            {/* school Code Input */}
             <View>
               <Text className="text-gray-700 font-semibold mb-2 ml-1">
                 স্কুল কোড
@@ -117,8 +120,8 @@ export default function Login() {
                 <FontAwesome5 name="hashtag" size={18} color="#6B7280" />
                 <TextInput
                   placeholder="আপনার স্কুল কোড দিন"
-                  value={spotCode}
-                  onChangeText={setSpotCode}
+                  value={schoolCode}
+                  onChangeText={setschoolCode}
                   className="flex-1 ml-3 text-gray-800 text-base"
                   placeholderTextColor="#9CA3AF"
                   autoCapitalize="none"

@@ -1,5 +1,6 @@
 // app/_layout.tsx
-import { getStpotDetails } from "@/utils/spot";
+
+import { getSchoolDetails } from "@/utils/school";
 import { Ionicons } from "@expo/vector-icons";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import {
@@ -25,6 +26,7 @@ function CustomDrawerContent(props: any) {
         text: "হ্যাঁ",
         onPress: async () => {
           // ১. সব ডাটা মুছে ফেলা
+
           await AsyncStorage.removeItem("token");
           await AsyncStorage.removeItem("user");
 
@@ -34,13 +36,13 @@ function CustomDrawerContent(props: any) {
       },
     ]);
   };
-  const [spot, setSpot] = useState<any>(null);
+  const [school, setschool] = useState<any>(null);
   useEffect(() => {
-    const fetchSpotDetails = async () => {
-      const spotData = await getStpotDetails();
-      setSpot(spotData);
+    const fetchschoolDetails = async () => {
+      const schoolData = await getSchoolDetails();
+      setschool(schoolData);
     };
-    fetchSpotDetails();
+    fetchschoolDetails();
   }, []);
 
   return (
@@ -56,10 +58,10 @@ function CustomDrawerContent(props: any) {
           </View>
           <Text className="text-xl font-bold text-gray-800">
             {/* স্পট নাম লোড হলে তা দেখাবে, না হলে ডিফল্ট */}
-            {spot?.data?.spotName || "স্পট ম্যানেজার"}
+            {school?.data?.schoolName || "স্পট ম্যানেজার"}
           </Text>
           <Text className="text-sm font-bold text-gray-800">
-            স্কুল কোড: {spot?.data?.spotCode || "spot Code"}
+            স্কুল কোড: {school?.data?.schoolCode || "school Code"}
           </Text>
           <Text className="text-sm text-gray-500">ম্যানেজমেন্ট ড্যাশবোর্ড</Text>
         </View>

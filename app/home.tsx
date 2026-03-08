@@ -1,6 +1,7 @@
 import api from "@/utils/api";
 import { formatBanglaDate } from "@/utils/formatBanglaDate";
-import { getStpotDetails } from "@/utils/spot";
+
+import { getSchoolDetails } from "@/utils/school";
 import {
   Ionicons,
   MaterialCommunityIcons,
@@ -26,19 +27,19 @@ import ContactButtons from "./call/call";
 // Type Definitions
 type TAttendance = {
   _id: string;
-  spotId: string;
-  male?: number;
-  female?: number;
-  child?: number;
+  schoolId: string;
+  banruti?: number;
+  banana?: number;
+  egg?: number;
   createdAt: string;
   updatedAt: string;
   __v: number;
 };
 
 interface IAttendance {
-  lastMale: TAttendance;
-  lastFemale: TAttendance;
-  lastChild: TAttendance;
+  lastBanruti: TAttendance;
+  lastBanana: TAttendance;
+  lastEgg: TAttendance;
 }
 
 export default function Home() {
@@ -48,34 +49,37 @@ export default function Home() {
   const [loadingData, setLoadingData] = useState(true);
   const [lastItem, setLastItem] = useState<IAttendance | null>(null);
 
-  const [loadingMale, setLoadingMale] = useState(false);
-  const [loadingFemale, setLoadingFemale] = useState(false);
-  const [loadingChild, setLoadingChild] = useState(false);
+  const [loadingbanruti, setLoadingbanruti] = useState(false);
+  const [loadingbanana, setLoadingbanana] = useState(false);
+  const [loadingEgg, setLoadingEgg] = useState(false);
   const [loadingComment, setLoadingComment] = useState(false);
 
-  const [femaleValue, setFemaleValue] = useState("");
-  const [maleValue, setMaleValue] = useState("");
-  const [childValue, setChildValue] = useState("");
+  const [bananaValue, setbananaValue] = useState("");
+  const [banrutiValue, setbanrutiValue] = useState("");
+  const [childValue, setEggValue] = useState("");
   const [commentValue, setCommentValue] = useState("");
 
   const isGlobalLoading =
-    loadingMale || loadingFemale || loadingChild || loadingComment;
+    loadingbanruti || loadingbanana || loadingEgg || loadingComment;
 
-  const isMaleButtonDisabled =
-    isGlobalLoading || maleValue.trim() === "" || parseInt(maleValue) === 0;
-  const isFemaleButtonDisabled =
-    isGlobalLoading || femaleValue.trim() === "" || parseInt(femaleValue) === 0;
-  const isChildButtonDisabled =
+  const isbanrutiButtonDisabled =
+    isGlobalLoading ||
+    banrutiValue.trim() === "" ||
+    parseInt(banrutiValue) === 0;
+  const isbananaButtonDisabled =
+    isGlobalLoading || bananaValue.trim() === "" || parseInt(bananaValue) === 0;
+  const isEggButtonDisabled =
     isGlobalLoading || childValue.trim() === "" || parseInt(childValue) === 0;
   const isCommentButtonDisabled = isGlobalLoading || commentValue.trim() === "";
 
   const loadLast = async () => {
     try {
-      const spot = await getStpotDetails();
-      if (spot?.data?._id) {
+      const school = await getSchoolDetails();
+      if (school?.data?._id) {
         const res = await api.get(
-          `/attendance/get-all-last-attendance?spotId=${spot.data._id}`,
+          `/attendance/get-all-last-attendance?schoolId=${school.data._id}`,
         );
+
         if (res?.data?.data && res.data.data.length > 0) {
           setLastItem(res.data.data[0]);
         } else {
@@ -93,9 +97,9 @@ export default function Home() {
     useCallback(() => {
       setLoadingData(true);
       loadLast();
-      setMaleValue("");
-      setFemaleValue("");
-      setChildValue("");
+      setbanrutiValue("");
+      setbananaValue("");
+      setEggValue("");
       setCommentValue("");
     }, []),
   );
@@ -116,16 +120,16 @@ export default function Home() {
       return;
     }
     setLoading(true);
-    const spot = await getStpotDetails();
+    const school = await getSchoolDetails();
     try {
       await api.post(endpoint, {
         [name]: parseInt(value || "0"),
-        spotId: spot?.data?._id,
+        schoolId: school?.data?._id,
       });
       Alert.alert("সফল", "তথ্য সফলভাবে আপডেট করা হয়েছে");
-      if (name === "male") setMaleValue("");
-      if (name === "female") setFemaleValue("");
-      if (name === "child") setChildValue("");
+      if (name === "banruti") setbanrutiValue("");
+      if (name === "banana") setbananaValue("");
+      if (name === "child") setEggValue("");
       loadLast();
     } catch (error: any) {
       Alert.alert(
@@ -140,10 +144,10 @@ export default function Home() {
   const handleCommentSubmit = async () => {
     if (isCommentButtonDisabled) return;
     setLoadingComment(true);
-    const spot = await getStpotDetails();
+    const school = await getSchoolDetails();
     try {
       await api.post("/attendance/create-comment", {
-        spotId: spot?.data?._id,
+        schoolId: school?.data?._id,
         comment: commentValue.trim(),
       });
       Alert.alert("সফল", "আপনার মন্তব্য সফলভাবে পাঠানো হয়েছে");
@@ -214,18 +218,18 @@ export default function Home() {
                     />
                   </View>
                   <Text className="text-xl font-bold text-gray-800">
-                    বণরুটি
+                    বনরুটি
                   </Text>
                 </View>
 
                 <View
-                  className={`px-3 py-1 rounded-full ${lastItem?.lastMale ? "bg-blue-50" : "bg-red-50"}`}
+                  className={`px-3 py-1 rounded-full ${lastItem?.lastBanruti ? "bg-blue-50" : "bg-red-50"}`}
                 >
                   <Text
-                    className={`${lastItem?.lastMale ? "text-blue-600" : "text-red-500"} text-xs font-medium`}
+                    className={`${lastItem?.lastBanruti ? "text-blue-600" : "text-red-500"} text-xs font-medium`}
                   >
-                    {lastItem?.lastMale
-                      ? `${formatBanglaDate(lastItem.lastMale.createdAt)} - ${lastItem.lastMale.male} টি`
+                    {lastItem?.lastBanruti
+                      ? `${formatBanglaDate(lastItem?.lastBanruti?.createdAt)} - ${lastItem?.lastBanruti?.banruti} টি`
                       : "এন্ট্রি নেই"}
                   </Text>
                 </View>
@@ -234,26 +238,26 @@ export default function Home() {
               <View className="flex-row gap-3">
                 <TextInput
                   placeholder="সংখ্যা লিখুন"
-                  value={maleValue}
-                  onChangeText={setMaleValue}
+                  value={banrutiValue}
+                  onChangeText={setbanrutiValue}
                   keyboardType="numeric"
                   className="flex-1 bg-gray-50 border border-gray-200 text-gray-800 text-base rounded-xl px-4 py-3"
                   placeholderTextColor="#9CA3AF"
                 />
                 <TouchableOpacity
-                  disabled={isMaleButtonDisabled}
+                  disabled={isbanrutiButtonDisabled}
                   className="justify-center items-center rounded-xl px-6 shadow-sm bg-blue-600 active:bg-blue-700"
                   onPress={() =>
                     handleSubmit(
-                      "male",
-                      maleValue,
-                      "/attendance/create-male",
-                      setLoadingMale,
+                      "banruti",
+                      banrutiValue,
+                      "/attendance/create-banruti",
+                      setLoadingbanruti,
                     )
                   }
                 >
                   <Text className="text-white font-bold text-base">
-                    {loadingMale ? (
+                    {loadingbanruti ? (
                       <ActivityIndicator color="white" />
                     ) : (
                       "আপডেট"
@@ -279,13 +283,13 @@ export default function Home() {
                 </View>
 
                 <View
-                  className={`px-3 py-1 rounded-full ${lastItem?.lastFemale ? "bg-purple-50" : "bg-red-50"}`}
+                  className={`px-3 py-1 rounded-full ${lastItem?.lastEgg ? "bg-purple-50" : "bg-red-50"}`}
                 >
                   <Text
-                    className={`${lastItem?.lastFemale ? "text-purple-600" : "text-red-500"} text-xs font-medium`}
+                    className={`${lastItem?.lastEgg ? "text-purple-600" : "text-red-500"} text-xs font-medium`}
                   >
-                    {lastItem?.lastFemale
-                      ? `${formatBanglaDate(lastItem.lastFemale.createdAt)} - ${lastItem.lastFemale.female} টি`
+                    {lastItem?.lastBanana
+                      ? `${formatBanglaDate(lastItem?.lastEgg?.createdAt)} - ${lastItem?.lastEgg?.egg} টি`
                       : "এন্ট্রি নেই"}
                   </Text>
                 </View>
@@ -294,26 +298,26 @@ export default function Home() {
               <View className="flex-row gap-3">
                 <TextInput
                   placeholder="সংখ্যা লিখুন"
-                  value={femaleValue}
-                  onChangeText={setFemaleValue}
+                  value={bananaValue}
+                  onChangeText={setbananaValue}
                   keyboardType="numeric"
                   className="flex-1 bg-gray-50 border border-gray-200 text-gray-800 text-base rounded-xl px-4 py-3"
                   placeholderTextColor="#9CA3AF"
                 />
                 <TouchableOpacity
-                  disabled={isFemaleButtonDisabled}
+                  disabled={isbananaButtonDisabled}
                   className="justify-center items-center rounded-xl px-6 shadow-sm bg-purple-600 active:bg-purple-700"
                   onPress={() =>
                     handleSubmit(
-                      "female",
-                      femaleValue,
-                      "/attendance/create-female",
-                      setLoadingFemale,
+                      "banana",
+                      bananaValue,
+                      "/attendance/create-banana",
+                      setLoadingbanana,
                     )
                   }
                 >
                   <Text className="text-white font-bold text-base">
-                    {loadingFemale ? (
+                    {loadingbanana ? (
                       <ActivityIndicator color="white" />
                     ) : (
                       "আপডেট"
@@ -335,13 +339,13 @@ export default function Home() {
                 </View>
 
                 <View
-                  className={`px-3 py-1 rounded-full ${lastItem?.lastChild ? "bg-green-50" : "bg-red-50"}`}
+                  className={`px-3 py-1 rounded-full ${lastItem?.lastBanana ? "bg-green-50" : "bg-red-50"}`}
                 >
                   <Text
-                    className={`${lastItem?.lastChild ? "text-green-600" : "text-red-500"} text-xs font-medium`}
+                    className={`${lastItem?.lastBanana ? "text-green-600" : "text-red-500"} text-xs font-medium`}
                   >
-                    {lastItem?.lastChild
-                      ? `${formatBanglaDate(lastItem.lastChild.createdAt)} - ${lastItem.lastChild.child} টি`
+                    {lastItem?.lastEgg
+                      ? `${formatBanglaDate(lastItem?.lastBanana?.createdAt)} - ${lastItem?.lastBanana?.banana} টি`
                       : "এন্ট্রি নেই"}
                   </Text>
                 </View>
@@ -351,29 +355,25 @@ export default function Home() {
                 <TextInput
                   placeholder="সংখ্যা লিখুন"
                   value={childValue}
-                  onChangeText={setChildValue}
+                  onChangeText={setEggValue}
                   keyboardType="numeric"
                   className="flex-1 bg-gray-50 border border-gray-200 text-gray-800 text-base rounded-xl px-4 py-3"
                   placeholderTextColor="#9CA3AF"
                 />
                 <TouchableOpacity
-                  disabled={isChildButtonDisabled}
+                  disabled={isEggButtonDisabled}
                   className="justify-center items-center rounded-xl px-6 shadow-sm bg-green-600 active:bg-green-700"
                   onPress={() =>
                     handleSubmit(
-                      "child",
+                      "egg",
                       childValue,
-                      "/attendance/create-child",
-                      setLoadingChild,
+                      "/attendance/create-egg",
+                      setLoadingEgg,
                     )
                   }
                 >
                   <Text className="text-white font-bold text-base">
-                    {loadingChild ? (
-                      <ActivityIndicator color="white" />
-                    ) : (
-                      "আপডেট"
-                    )}
+                    {loadingEgg ? <ActivityIndicator color="white" /> : "আপডেট"}
                   </Text>
                 </TouchableOpacity>
               </View>
