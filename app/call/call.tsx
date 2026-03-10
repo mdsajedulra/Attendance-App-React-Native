@@ -34,7 +34,7 @@ export default function ContactButtons() {
     getContactInfo();
   }, []);
 
-  console.log("test call", contactInfo);
+
 
   const [school, setschool] = useState<any>(null);
   useEffect(() => {

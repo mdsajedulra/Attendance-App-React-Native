@@ -5,7 +5,7 @@ import { Alert } from "react-native";
 
 export const handleSubmit = async (name, value, endpoint) => {
   const school = await getSchoolDetails();
-  console.log(school.data._id);
+
   try {
     const res = await api.post(endpoint || "/attendance/create-female", {
       [name]: parseInt(value || "0"),

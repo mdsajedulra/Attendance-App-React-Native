@@ -42,8 +42,6 @@ export default function Home() {
   const [loadingData, setLoadingData] = useState(true);
   const [lastItem, setLastItem] = useState<TAttendance | null>(null);
 
-  console.log("test", lastItem);
-
   const [loadingbanruti, setLoadingbanruti] = useState(false);
   const [loadingbanana, setLoadingBanana] = useState(false);
   const [loadingEgg, setLoadingEgg] = useState(false);
@@ -51,7 +49,7 @@ export default function Home() {
 
   const [bananaValue, setbananaValue] = useState("");
   const [banrutiValue, setbanrutiValue] = useState("");
-  const [childValue, setEggValue] = useState("");
+  const [eggValue, setEggValue] = useState("");
   const [commentValue, setCommentValue] = useState("");
 
   const isGlobalLoading =
@@ -64,7 +62,7 @@ export default function Home() {
   const isbananaButtonDisabled =
     isGlobalLoading || bananaValue.trim() === "" || parseInt(bananaValue) === 0;
   const isEggButtonDisabled =
-    isGlobalLoading || childValue.trim() === "" || parseInt(childValue) === 0;
+    isGlobalLoading || eggValue.trim() === "" || parseInt(eggValue) === 0;
   const isCommentButtonDisabled = isGlobalLoading || commentValue.trim() === "";
 
   const loadLast = async () => {
@@ -74,7 +72,7 @@ export default function Home() {
         const res = await api.get(
           `/attendance/get-last?schoolId=${school.data._id}`,
         );
-        console.log(res?.data?.data);
+
         if (res?.data?.data) {
           setLastItem(res?.data?.data);
         } else {
@@ -82,7 +80,6 @@ export default function Home() {
         }
       }
     } catch (error) {
-      console.log("Error loading data", error);
     } finally {
       setLoadingData(false);
     }
@@ -118,19 +115,21 @@ export default function Home() {
     const school = await getSchoolDetails();
     try {
       await api.post(endpoint, {
-        [name]: { count: parseInt(value || "0"), submittedAt: Date() },
+        [name]: { count: parseInt(value || "0"), submittedAt: new Date() },
         schoolId: school?.data?._id,
       });
       Alert.alert("সফল", "তথ্য সফলভাবে আপডেট করা হয়েছে");
       if (name === "banruti") setbanrutiValue("");
       if (name === "banana") setbananaValue("");
-      if (name === "child") setEggValue("");
+      if (name === "egg") setEggValue("");
       loadLast();
     } catch (error: any) {
-      Alert.alert(
-        "ত্রুটি",
-        error?.response?.data?.message || "Something went wrong",
-      );
+      // console.log(error?.response?.data?.message);
+      if (error?.response && error.response.data) {
+        const message = error?.response?.data?.message;
+        console.log(message);
+        Alert.alert("ত্রুটি", message);
+      }
     } finally {
       setLoading(false);
     }
@@ -295,22 +294,17 @@ export default function Home() {
               <View className="flex-row gap-3">
                 <TextInput
                   placeholder="সংখ্যা লিখুন"
-                  value={bananaValue}
-                  onChangeText={setbananaValue}
+                  value={eggValue}
+                  onChangeText={setEggValue}
                   keyboardType="numeric"
                   className="flex-1 bg-gray-50 border border-gray-200 text-gray-800 text-base rounded-xl px-4 py-3"
                   placeholderTextColor="#9CA3AF"
                 />
                 <TouchableOpacity
-                  disabled={isbananaButtonDisabled}
+                  disabled={isEggButtonDisabled}
                   className="justify-center items-center rounded-xl px-6 shadow-sm bg-purple-600 active:bg-purple-700"
                   onPress={() =>
-                    handleSubmit(
-                      "egg",
-                      bananaValue,
-                      "/attendance",
-                      setLoadingEgg,
-                    )
+                    handleSubmit("egg", eggValue, "/attendance", setLoadingEgg)
                   }
                 >
                   <Text className="text-white font-bold text-base">
@@ -347,7 +341,7 @@ export default function Home() {
               <View className="flex-row gap-3">
                 <TextInput
                   placeholder="সংখ্যা লিখুন"
-                  value={childValue}
+                  value={bananaValue}
                   onChangeText={setbananaValue}
                   keyboardType="numeric"
                   className="flex-1 bg-gray-50 border border-gray-200 text-gray-800 text-base rounded-xl px-4 py-3"
@@ -359,7 +353,7 @@ export default function Home() {
                   onPress={() =>
                     handleSubmit(
                       "banana",
-                      childValue,
+                      bananaValue,
                       "/attendance",
                       setLoadingBanana,
                     )
