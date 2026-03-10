@@ -25,32 +25,27 @@ import { RefreshControl } from "react-native-gesture-handler";
 import ContactButtons from "./call/call";
 
 // Type Definitions
-type TAttendance = {
-  _id: string;
-  schoolId: string;
-  banruti?: number;
-  banana?: number;
-  egg?: number;
-  createdAt: string;
-  updatedAt: string;
-  __v: number;
+type TAE = {
+  count: number;
+  submittedAt: Date;
 };
-
-interface IAttendance {
-  lastBanruti: TAttendance;
-  lastBanana: TAttendance;
-  lastEgg: TAttendance;
-}
+type TAttendance = {
+  banruti?: TAE;
+  banana?: TAE;
+  egg?: TAE;
+};
 
 export default function Home() {
   const router = useRouter();
 
   const [refreshing, setRefreshing] = useState(false);
   const [loadingData, setLoadingData] = useState(true);
-  const [lastItem, setLastItem] = useState<IAttendance | null>(null);
+  const [lastItem, setLastItem] = useState<TAttendance | null>(null);
+
+  console.log("test", lastItem);
 
   const [loadingbanruti, setLoadingbanruti] = useState(false);
-  const [loadingbanana, setLoadingbanana] = useState(false);
+  const [loadingbanana, setLoadingBanana] = useState(false);
   const [loadingEgg, setLoadingEgg] = useState(false);
   const [loadingComment, setLoadingComment] = useState(false);
 
@@ -77,11 +72,11 @@ export default function Home() {
       const school = await getSchoolDetails();
       if (school?.data?._id) {
         const res = await api.get(
-          `/attendance/get-all-last-attendance?schoolId=${school.data._id}`,
+          `/attendance/get-last?schoolId=${school.data._id}`,
         );
-
-        if (res?.data?.data && res.data.data.length > 0) {
-          setLastItem(res.data.data[0]);
+        console.log(res?.data?.data);
+        if (res?.data?.data) {
+          setLastItem(res?.data?.data);
         } else {
           setLastItem(null);
         }
@@ -123,7 +118,7 @@ export default function Home() {
     const school = await getSchoolDetails();
     try {
       await api.post(endpoint, {
-        [name]: parseInt(value || "0"),
+        [name]: { count: parseInt(value || "0"), submittedAt: Date() },
         schoolId: school?.data?._id,
       });
       Alert.alert("সফল", "তথ্য সফলভাবে আপডেট করা হয়েছে");
@@ -223,13 +218,15 @@ export default function Home() {
                 </View>
 
                 <View
-                  className={`px-3 py-1 rounded-full ${lastItem?.lastBanruti ? "bg-blue-50" : "bg-red-50"}`}
+                  className={`px-3 py-1 rounded-full ${lastItem?.banruti ? "bg-blue-50" : "bg-red-50"}`}
                 >
                   <Text
-                    className={`${lastItem?.lastBanruti ? "text-blue-600" : "text-red-500"} text-xs font-medium`}
+                    className={`${lastItem?.banruti ? "text-blue-600" : "text-red-500"} text-xs font-medium`}
                   >
-                    {lastItem?.lastBanruti
-                      ? `${formatBanglaDate(lastItem?.lastBanruti?.createdAt)} - ${lastItem?.lastBanruti?.banruti} টি`
+                    {lastItem?.banruti
+                      ? `${formatBanglaDate(
+                          lastItem?.banruti?.submittedAt,
+                        )} - ${lastItem?.banruti?.count} টি`
                       : "এন্ট্রি নেই"}
                   </Text>
                 </View>
@@ -251,7 +248,7 @@ export default function Home() {
                     handleSubmit(
                       "banruti",
                       banrutiValue,
-                      "/attendance/create-banruti",
+                      "/attendance",
                       setLoadingbanruti,
                     )
                   }
@@ -283,13 +280,13 @@ export default function Home() {
                 </View>
 
                 <View
-                  className={`px-3 py-1 rounded-full ${lastItem?.lastEgg ? "bg-purple-50" : "bg-red-50"}`}
+                  className={`px-3 py-1 rounded-full ${lastItem?.egg ? "bg-purple-50" : "bg-red-50"}`}
                 >
                   <Text
-                    className={`${lastItem?.lastEgg ? "text-purple-600" : "text-red-500"} text-xs font-medium`}
+                    className={`${lastItem?.egg ? "text-purple-600" : "text-red-500"} text-xs font-medium`}
                   >
-                    {lastItem?.lastBanana
-                      ? `${formatBanglaDate(lastItem?.lastEgg?.createdAt)} - ${lastItem?.lastEgg?.egg} টি`
+                    {lastItem?.egg
+                      ? `${formatBanglaDate(lastItem?.egg?.submittedAt)} - ${lastItem?.egg?.count} টি`
                       : "এন্ট্রি নেই"}
                   </Text>
                 </View>
@@ -309,19 +306,15 @@ export default function Home() {
                   className="justify-center items-center rounded-xl px-6 shadow-sm bg-purple-600 active:bg-purple-700"
                   onPress={() =>
                     handleSubmit(
-                      "banana",
+                      "egg",
                       bananaValue,
-                      "/attendance/create-banana",
-                      setLoadingbanana,
+                      "/attendance",
+                      setLoadingEgg,
                     )
                   }
                 >
                   <Text className="text-white font-bold text-base">
-                    {loadingbanana ? (
-                      <ActivityIndicator color="white" />
-                    ) : (
-                      "আপডেট"
-                    )}
+                    {loadingEgg ? <ActivityIndicator color="white" /> : "আপডেট"}
                   </Text>
                 </TouchableOpacity>
               </View>
@@ -339,13 +332,13 @@ export default function Home() {
                 </View>
 
                 <View
-                  className={`px-3 py-1 rounded-full ${lastItem?.lastBanana ? "bg-green-50" : "bg-red-50"}`}
+                  className={`px-3 py-1 rounded-full ${lastItem?.banana ? "bg-green-50" : "bg-red-50"}`}
                 >
                   <Text
-                    className={`${lastItem?.lastBanana ? "text-green-600" : "text-red-500"} text-xs font-medium`}
+                    className={`${lastItem?.banana ? "text-green-600" : "text-red-500"} text-xs font-medium`}
                   >
-                    {lastItem?.lastEgg
-                      ? `${formatBanglaDate(lastItem?.lastBanana?.createdAt)} - ${lastItem?.lastBanana?.banana} টি`
+                    {lastItem?.banana
+                      ? `${formatBanglaDate(lastItem?.banana?.submittedAt as Date | string)} - ${lastItem?.banana?.count} টি`
                       : "এন্ট্রি নেই"}
                   </Text>
                 </View>
@@ -355,25 +348,29 @@ export default function Home() {
                 <TextInput
                   placeholder="সংখ্যা লিখুন"
                   value={childValue}
-                  onChangeText={setEggValue}
+                  onChangeText={setbananaValue}
                   keyboardType="numeric"
                   className="flex-1 bg-gray-50 border border-gray-200 text-gray-800 text-base rounded-xl px-4 py-3"
                   placeholderTextColor="#9CA3AF"
                 />
                 <TouchableOpacity
-                  disabled={isEggButtonDisabled}
+                  disabled={isbananaButtonDisabled}
                   className="justify-center items-center rounded-xl px-6 shadow-sm bg-green-600 active:bg-green-700"
                   onPress={() =>
                     handleSubmit(
-                      "egg",
+                      "banana",
                       childValue,
-                      "/attendance/create-egg",
-                      setLoadingEgg,
+                      "/attendance",
+                      setLoadingBanana,
                     )
                   }
                 >
                   <Text className="text-white font-bold text-base">
-                    {loadingEgg ? <ActivityIndicator color="white" /> : "আপডেট"}
+                    {loadingbanana ? (
+                      <ActivityIndicator color="white" />
+                    ) : (
+                      "আপডেট"
+                    )}
                   </Text>
                 </TouchableOpacity>
               </View>

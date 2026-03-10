@@ -1,9 +1,41 @@
+import api from "@/utils/api";
 import { getSchoolDetails } from "@/utils/school";
 import { FontAwesome, Ionicons } from "@expo/vector-icons";
 import React, { useEffect, useState } from "react";
 import { Alert, Linking, Text, TouchableOpacity, View } from "react-native";
 
+type IContactInfo = {
+  _id: string;
+  email: string;
+  message: string;
+  phoneNumber: string;
+  updatedAt: string;
+  waNumber: string;
+  __v: string;
+};
+
 export default function ContactButtons() {
+  const [contactInfo, setContactInfo] = useState<IContactInfo>({
+    __v: "",
+    _id: "",
+    email: "",
+    message: "",
+    phoneNumber: "",
+    updatedAt: "",
+    waNumber: "",
+  });
+
+  const getContactInfo = async () => {
+    const getContactDetails = await api.get("/contactinfo");
+    setContactInfo(getContactDetails.data?.data[0]);
+  };
+
+  useEffect(() => {
+    getContactInfo();
+  }, []);
+
+  console.log("test call", contactInfo);
+
   const [school, setschool] = useState<any>(null);
   useEffect(() => {
     const fetchschoolDetails = async () => {
@@ -13,18 +45,18 @@ export default function ContactButtons() {
     fetchschoolDetails();
   }, []);
 
-  const phoneNumber = "01780941957";
+  const { phoneNumber, waNumber, message } = contactInfo;
 
   const whatsappMessage = `${school?.data?.schoolName || "N/A"}, আমার কোড ${
     school?.data?.schoolCode || "N/A"
-  } আমি আপনার সাথে কথা বলতে চাই`;
+  } ${message}`;
 
   const makeCall = () => {
     Linking.openURL(`tel:${phoneNumber}`);
   };
   const openWhatsApp = () => {
     Linking.openURL(
-      `whatsapp://send?phone=${"+88" + phoneNumber}&text=${encodeURIComponent(
+      `whatsapp://send?phone=${"+88" + waNumber}&text=${encodeURIComponent(
         whatsappMessage,
       )}`,
     ).catch(() => {

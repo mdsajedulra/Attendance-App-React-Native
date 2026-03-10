@@ -1,4 +1,6 @@
-export function formatBanglaDate(isoString: string): string {
+
+
+export function formatBanglaDate(isoString: string | Date): string {
   const date = new Date(isoString);
 
   // Bangla numbers mapping
