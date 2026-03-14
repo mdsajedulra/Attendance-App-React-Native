@@ -57,10 +57,10 @@ function CustomDrawerContent(props: any) {
             <Ionicons name="person" size={30} color="#2563EB" />
           </View>
           <Text className="text-xl font-bold text-gray-800">
-            {school?.data?.schoolName || "স্পট ম্যানেজার"}
+            {school?.schoolName || "স্পট ম্যানেজার"}
           </Text>
           <Text className="text-sm font-bold text-gray-800">
-            স্কুল কোড: {school?.data?.schoolCode || "----"}
+            স্কুল কোড: {school?.schoolCode || "----"}
           </Text>
           <Text className="text-sm text-gray-500">ম্যানেজমেন্ট ড্যাশবোর্ড</Text>
         </View>

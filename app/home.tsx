@@ -41,7 +41,6 @@ export default function Home() {
   const [refreshing, setRefreshing] = useState(false);
   const [loadingData, setLoadingData] = useState(true);
   const [lastItem, setLastItem] = useState<TAttendance | null>(null);
-
   const [loadingbanruti, setLoadingbanruti] = useState(false);
   const [loadingbanana, setLoadingBanana] = useState(false);
   const [loadingEgg, setLoadingEgg] = useState(false);
@@ -66,11 +65,12 @@ export default function Home() {
   const isCommentButtonDisabled = isGlobalLoading || commentValue.trim() === "";
 
   const loadLast = async () => {
+    const school = await getSchoolDetails();
+
     try {
-      const school = await getSchoolDetails();
-      if (school?.data?._id) {
+      if (school?._id) {
         const res = await api.get(
-          `/attendance/get-last?schoolId=${school.data._id}`,
+          `/attendance/get-last?schoolId=${school?._id}`,
         );
 
         if (res?.data?.data) {
@@ -84,7 +84,7 @@ export default function Home() {
       setLoadingData(false);
     }
   };
-
+  console.log(lastItem);
   useFocusEffect(
     useCallback(() => {
       setLoadingData(true);
@@ -113,10 +113,12 @@ export default function Home() {
     }
     setLoading(true);
     const school = await getSchoolDetails();
+    // console.log(school);
     try {
       await api.post(endpoint, {
         [name]: { count: parseInt(value || "0"), submittedAt: new Date() },
-        schoolId: school?.data?._id,
+        schoolId: school?._id,
+        date: new Date(),
       });
       Alert.alert("সফল", "তথ্য সফলভাবে আপডেট করা হয়েছে");
       if (name === "banruti") setbanrutiValue("");
@@ -124,10 +126,10 @@ export default function Home() {
       if (name === "egg") setEggValue("");
       loadLast();
     } catch (error: any) {
-      // console.log(error?.response?.data?.message);
+      // console.log(error);
       if (error?.response && error.response.data) {
         const message = error?.response?.data?.message;
-        console.log(message);
+        // console.log(message);
         Alert.alert("ত্রুটি", message);
       }
     } finally {
@@ -135,13 +137,15 @@ export default function Home() {
     }
   };
 
+  // comment submit handle start from here
+
   const handleCommentSubmit = async () => {
     if (isCommentButtonDisabled) return;
     setLoadingComment(true);
     const school = await getSchoolDetails();
     try {
       await api.post("/attendance/create-comment", {
-        schoolId: school?.data?._id,
+        schoolId: school?._id,
         comment: commentValue.trim(),
       });
       Alert.alert("সফল", "আপনার মন্তব্য সফলভাবে পাঠানো হয়েছে");

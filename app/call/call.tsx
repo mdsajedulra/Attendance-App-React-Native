@@ -27,16 +27,15 @@ export default function ContactButtons() {
 
   const getContactInfo = async () => {
     const getContactDetails = await api.get("/contactinfo");
-    setContactInfo(getContactDetails.data?.data[0]);
+    setContactInfo(getContactDetails.data?.data);
   };
 
   useEffect(() => {
     getContactInfo();
   }, []);
 
-
-
   const [school, setschool] = useState<any>(null);
+
   useEffect(() => {
     const fetchschoolDetails = async () => {
       const schoolData = await getSchoolDetails();
@@ -47,8 +46,8 @@ export default function ContactButtons() {
 
   const { phoneNumber, waNumber, message } = contactInfo;
 
-  const whatsappMessage = `${school?.data?.schoolName || "N/A"}, আমার কোড ${
-    school?.data?.schoolCode || "N/A"
+  const whatsappMessage = `${school?.schoolName || "N/A"}, আমার কোড ${
+    school?.schoolCode || "N/A"
   } ${message}`;
 
   const makeCall = () => {
