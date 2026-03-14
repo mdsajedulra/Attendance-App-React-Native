@@ -22,15 +22,30 @@ import { useSafeAreaInsets } from "react-native-safe-area-context";
 function CustomDrawerContent(props: any) {
   const { bottom } = useSafeAreaInsets();
   const router = useRouter();
+  const segments = useSegments(); // রুট ট্র্যাক করার জন্য
   const [school, setschool] = useState<any>(null);
 
-  useEffect(() => {
-    const fetchschoolDetails = async () => {
+  // ডেটা ফেচ করার ফাংশন
+  const fetchschoolDetails = async () => {
+    try {
       const schoolData = await getSchoolDetails();
-      setschool(schoolData);
-    };
-    fetchschoolDetails();
-  }, []);
+      // যদি স্কুল ডেটা অবজেক্টের ভেতর থাকে (যেমন: schoolData.data)
+      // আপনার API রেসপন্স অনুযায়ী এটা চেক করে নিবেন
+      setschool(schoolData?.data || schoolData);
+    } catch (error) {
+      console.log("Error loading school details:", error);
+    }
+  };
+
+  useEffect(() => {
+    // যখন ইউজার লগিন করা অবস্থায় থাকে (যেমন home পেজে), তখন ডেটা লোড হবে
+    const isLoggedIn = segments.length > 0 && segments[0] !== "index";
+    if (isLoggedIn) {
+      fetchschoolDetails();
+    } else {
+      setschool(null); // লগআউট থাকলে স্টেট ক্লিয়ার করে দাও
+    }
+  }, [segments]); // রুট চেঞ্জ হলেই ড্রয়ার ডেটা আপডেট করবে
 
   const handleLogout = () => {
     Alert.alert("লগআউট", "আপনি কি নিশ্চিত যে আপনি লগআউট করতে চান?", [
@@ -40,6 +55,7 @@ function CustomDrawerContent(props: any) {
         onPress: async () => {
           await AsyncStorage.removeItem("token");
           await AsyncStorage.removeItem("user");
+          setschool(null); // স্টেট ক্লিয়ার
           router.replace("/");
         },
       },
@@ -68,6 +84,7 @@ function CustomDrawerContent(props: any) {
           <DrawerItemList {...props} />
         </View>
       </DrawerContentScrollView>
+
       <View
         className="p-4 border-t border-gray-100"
         style={{ paddingBottom: 20 + bottom }}
@@ -92,22 +109,17 @@ export default function Layout() {
   useEffect(() => {
     const checkAuth = async () => {
       const token = await AsyncStorage.getItem("token");
-
-      // ইউজার কি বর্তমানে লগিন পেজে (index) আছে?
       const inAuthGroup = segments.length === 0 || segments[0] === "index";
 
       if (!token && !inAuthGroup) {
-        // টোকেন নেই কিন্তু ভেতরে ঢোকার চেষ্টা করছে -> লগিন পেজে পাঠাও
         router.replace("/");
       } else if (token && inAuthGroup) {
-        // টোকেন আছে কিন্তু লগিন পেজে বসে আছে -> হোমে পাঠাও
         router.replace("/home");
       }
       setIsReady(true);
     };
-
     checkAuth();
-  }, [segments]); // রুট পরিবর্তন হলেই এই চেকটি হবে
+  }, [segments]);
 
   if (!isReady) {
     return (
@@ -146,7 +158,6 @@ export default function Layout() {
             ),
           }}
         />
-        {/* বাকি স্ক্রিনগুলো আগের মতোই থাকবে */}
         <Drawer.Screen
           name="male"
           options={{ title: "পুরুষ", drawerItemStyle: { display: "none" } }}
@@ -175,7 +186,6 @@ export default function Layout() {
           name="handleSubmit/handleSubmit"
           options={{ title: "সাবমিট", drawerItemStyle: { display: "none" } }}
         />
-
         <Drawer.Screen
           name="index"
           options={{
