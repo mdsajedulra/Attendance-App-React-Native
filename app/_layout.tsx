@@ -157,6 +157,24 @@ export default function Layout() {
               <Ionicons name="grid-outline" size={22} color={color} />
             ),
           }}
+        />ß
+        <Drawer.Screen
+          name="update-info"
+          options={{
+            title: "তথ্য হালনাগাদ করুন",
+            drawerIcon: ({ color }) => (
+              <Ionicons name="create-outline" size={22} color={color} />
+            ),
+          }}
+        />
+        <Drawer.Screen
+          name="reports"
+          options={{
+            title: "রিপোর্ট ডাউনলোড",
+            drawerIcon: ({ color }) => (
+              <Ionicons name="document-text-outline" size={22} color={color} />
+            ),
+          }}
         />
         <Drawer.Screen
           name="male"
